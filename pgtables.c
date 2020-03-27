@@ -1,15 +1,6 @@
 #include <stdint.h>
 #include "pgtables.h"
 
-/*
- * This project uses 64KiB granule, 2 level page tables.
- *
- * Level 0 doesn't exist in this situation, Level 1 is omitted, and level 2
- * has 8 items (for a 32-bit address space).
- *
- * Only the starting level 2 block has its internal structure (because it's
- * where the Allwinner I/O sits).
- */
 uint64_t pgtable_lv2[8] __attribute__((aligned(64)));
 uint64_t pgtable_lv3_blk0[8192];
 
@@ -33,4 +24,5 @@ void setup_pgtables()
 
 	asm volatile("msr vtcr_el2, %0" : : "r" (VTCR_VALUE) : "cc");	
 	asm volatile("msr vttbr_el2, %0" : : "r" (VTTBR_VALUE) : "cc");
+	asm volatile("isb");
 }

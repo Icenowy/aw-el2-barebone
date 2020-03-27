@@ -1,6 +1,15 @@
 #ifndef _PGTABLES_H_
 #define _PGTABLES_H
 
+/*
+ * This project uses 64KiB granule, 2 level page tables.
+ *
+ * Level 0 doesn't exist when 64KiB granule, Level 1 is omitted, and level 2
+ * has 8 items (for a 32-bit address space).
+ *
+ * Only the starting level 2 block has its internal structure (because it's
+ * where the Allwinner I/O sits).
+ */
 extern uint64_t pgtable_lv2[];
 
 #define VTCR_T0SZ_VALUE 32
@@ -18,7 +27,9 @@ extern uint64_t pgtable_lv2[];
 #define PTE_AP_S2_RW 0x3
 
 #define PTE_VALID (1 << 0)
-#define PTE_BLOCK (1 << 1)
+#define PTE_BLOCK (0 << 1)
+#define PTE_TABLE (1 << 1)
+#define PTE_PAGE (1 << 1)
 #define PTE_MT_S2_SHIFT 2
 #define PTE_AP_S2_SHIFT 6
 #define PTE_ACCESS_FLAG (1 << 10)
