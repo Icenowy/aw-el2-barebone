@@ -15,7 +15,7 @@
  */
 
 MEMORY { hvram : ORIGIN = 0x40010000,
-		LENGTH = 0x10000 }
+		LENGTH = 0x70000 }
 
 ENTRY(_start)
 SECTIONS
