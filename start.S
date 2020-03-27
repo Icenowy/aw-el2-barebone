@@ -8,6 +8,9 @@ _start:
 	ldr x1, =stack_generic
 	mov sp, x1
 
+	ldr x1, =vectors
+	msr vbar_el2, x1
+
 	bl init
 
 	ldr x4, =SOC_NEXT_STAGE
