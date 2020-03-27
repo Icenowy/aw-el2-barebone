@@ -17,7 +17,7 @@ LDSCRIPTS = ldscripts/a64.ld ldscripts/common.ld
 
 LDFLAGS = -nostdlib -nostartfiles -static -T $(LDSCRIPT)
 
-OBJS = start.o init.o uart.o
+OBJS = start.o init.o uart.o stack.o
 
 all: el2-bb.bin
 

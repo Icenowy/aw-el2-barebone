@@ -14,57 +14,59 @@
  * Icenowy Zheng <icenowy@aosc.io>
  */
 
+MEMORY { hvram : ORIGIN = 0x40010000,
+		LENGTH = 0x10000 }
+
 ENTRY(_start)
 SECTIONS
 {
-	. = 0x40010000;
 	.text : {
 		. = ALIGN(8);
 		*(.__image_copy_start)
 		start.o (.text*)
 		*(.text*)
-	}
+	} > hvram
 
 	.rodata : {
 		. = ALIGN(8);
 		*(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))
-	}
+	} > hvram
 
 	.data : {
 		. = ALIGN(8);
 		*(.data*)
-	}
+	} > hvram
 
 	.u_boot_list : {
 		. = ALIGN(8);
 		KEEP(*(SORT(.u_boot_list*)));
-	}
+	} > hvram
 
 	.image_copy_end : {
 		. = ALIGN(8);
 		*(.__image_copy_end)
-	}
+	} > hvram
 
 	.end : {
 		. = ALIGN(8);
 		*(.__end)
-	}
+	} > hvram
 
 	_image_binary_end = .;
 
 	.bss_start (NOLOAD) : {
 		. = ALIGN(8);
 		KEEP(*(.__bss_start));
-	}
+	} > hvram
 
 	.bss (NOLOAD) : {
 		*(.bss*)
 		 . = ALIGN(8);
-	}
+	} > hvram
 
 	.bss_end (NOLOAD) : {
 		KEEP(*(.__bss_end));
-	}
+	} > hvram
 
 	/DISCARD/ : { *(.dynsym) }
 	/DISCARD/ : { *(.dynstr*) }

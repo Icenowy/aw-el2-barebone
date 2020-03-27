@@ -5,7 +5,7 @@
 .globl _start
 
 _start:
-	ldr x1, =SOC_STACK_POSITION
+	ldr x1, =stack_generic
 	mov sp, x1
 
 	bl init
