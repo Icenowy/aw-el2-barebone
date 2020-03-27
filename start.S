@@ -54,8 +54,6 @@ _start:
 			SCTLR_EL1_ALIGN_DIS | SCTLR_EL1_MMU_DIS)
 	msr	sctlr_el1, x6
 
-	mov	x6, sp
-	msr	sp_el1, x6		/* Migrate SP */
 	mrs	x6, vbar_el2
 	msr	vbar_el1, x6		/* Migrate VBAR */
 
