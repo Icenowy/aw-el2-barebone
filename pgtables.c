@@ -13,7 +13,7 @@ void setup_pgtables()
 				 (PTE_AP_S2_RW << PTE_AP_S2_SHIFT) |
 				 PTE_ACCESS_FLAG;
 	}
-	for (int i = 2; i < 7; i++) {
+	for (int i = 2; i < 8; i++) {
 		pgtable_lv2[i] = (i << 29) | PTE_VALID | PTE_BLOCK |
 				 (PTE_MT_S2_NORMAL << PTE_MT_S2_SHIFT) |
 				 (PTE_AP_S2_RW << PTE_AP_S2_SHIFT) |
