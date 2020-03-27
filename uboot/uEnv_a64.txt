@@ -1,1 +1,2 @@
 #=uEnv
+bootcmd=true
