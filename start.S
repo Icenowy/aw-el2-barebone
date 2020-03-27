@@ -5,6 +5,8 @@
 .globl _start
 
 _start:
+	mov x1, #1
+	msr spsel, x1
 	ldr x1, =stack_generic
 	mov sp, x1
 
