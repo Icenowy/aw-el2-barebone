@@ -1,6 +1,7 @@
 #include SOC_HEADER
 #include "uart.h"
 #include "mmio.h"
+#include "pgtables.h"
 
 #include <asm/system.h>
 
@@ -10,6 +11,9 @@ int init()
 		uart_puts(SOC_UART0, "Error: current EL is not EL2\n");
 		return 1;
 	}
+
+	setup_pgtables();
+
 	uart_puts(SOC_UART0, "Switching to EL1\n");
 
 	return 0;
