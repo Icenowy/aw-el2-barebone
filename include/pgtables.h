@@ -30,6 +30,7 @@ extern uint64_t pgtable_lv2[];
 
 #define PTE_MT_S2_NORMAL 0xf
 #define PTE_MT_S2_DEVICE_nGnRE 0x1
+#define PTE_AP_S2_RO 0x1
 #define PTE_AP_S2_RW 0x3
 
 #define PTE_VALID (1 << 0)
