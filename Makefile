@@ -7,7 +7,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 
 INCLUDES = -I $(PWD)/include -I $(PWD)/uboot-headers -ffreestanding
 
-DEFINES = -DSOC_HEADER="\"a64.h\""
+DEFINES = -DSOC_HEADER="\"h6.h\""
 
 ASFLAGS = $(INCLUDES) $(DEFINES) -D__ASSEMBLY__
 CFLAGS = $(INCLUDES) $(DEFINES) -O2
