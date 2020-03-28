@@ -60,7 +60,7 @@ _start:
 	msr	vbar_el1, x6		/* Migrate VBAR */
 
 	/* Initialize HCR_EL2 */
-	ldr	x6, =(HCR_EL2_RW_AARCH64 | HCR_EL2_HCD_DIS | HCR_EL2_VM_ENABLE)
+	ldr	x6, =(HCR_EL2_RW_AARCH64 | HCR_EL2_HCD_DIS | HCR_EL2_TSC_ENABLE | HCR_EL2_VM_ENABLE)
 	msr	hcr_el2, x6
 
 	/* Return to the EL1_SP1 mode from EL2 */

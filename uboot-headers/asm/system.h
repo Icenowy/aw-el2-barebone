@@ -73,6 +73,7 @@
 #define HCR_EL2_RW_AARCH64	(1 << 31) /* EL1 is AArch64                   */
 #define HCR_EL2_RW_AARCH32	(0 << 31) /* Lower levels are AArch32         */
 #define HCR_EL2_HCD_DIS		(1 << 29) /* Hypervisor Call disabled         */
+#define HCR_EL2_TSC_ENABLE	(1 << 19) /* Trap SMC enabled                 */
 #define HCR_EL2_VM_ENABLE	(1 << 0)  /* Virtualation enabled             */
 
 /*
