@@ -11,16 +11,14 @@ void setup_pgtables()
 		pgtable_lv2[i] = (i << 29) | PTE_VALID | PTE_BLOCK |
 				 (PTE_MT_S2_DEVICE_nGnRE << PTE_MT_S2_SHIFT) |
 				 (PTE_AP_S2_RW << PTE_AP_S2_SHIFT) |
-				 PTE_ACCESS_FLAG;
+				 PTE_ACCESS_FLAG | PTE_SH_INNER;
 	}
 	for (int i = 2; i < 8; i++) {
 		pgtable_lv2[i] = (i << 29) | PTE_VALID | PTE_BLOCK |
 				 (PTE_MT_S2_NORMAL << PTE_MT_S2_SHIFT) |
 				 (PTE_AP_S2_RW << PTE_AP_S2_SHIFT) |
-				 PTE_ACCESS_FLAG;
+				 PTE_ACCESS_FLAG | PTE_SH_INNER;
 	}
-
-//	pgtable_lv2[7] = 0;
 
 	asm volatile("msr vtcr_el2, %0" : : "r" (VTCR_VALUE) : "cc");	
 	asm volatile("msr vttbr_el2, %0" : : "r" (VTTBR_VALUE) : "cc");
