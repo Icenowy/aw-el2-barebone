@@ -1,4 +1,21 @@
+#include SOC_HEADER
 #include "panic.h"
+#include "uart.h"
+
+static void dump_exception_registers()
+{
+	uint64_t reg;
+	uart_puts(SOC_UART0, "\nelr_el2: ");
+	asm volatile("mrs %0, elr_el2" : "=r" (reg) : : "cc");
+	uart_hexval(SOC_UART0, reg);
+	uart_puts(SOC_UART0, "\nesr_el2: ");
+	asm volatile("mrs %0, esr_el2" : "=r" (reg) : : "cc");
+	uart_hexval(SOC_UART0, reg);
+	uart_puts(SOC_UART0, "\nfar_el2: ");
+	asm volatile("mrs %0, far_el2" : "=r" (reg) : : "cc");
+	uart_hexval(SOC_UART0, reg);
+	uart_puts(SOC_UART0, "\n");
+}
 
 void do_sync()
 {
@@ -42,6 +59,7 @@ void do_bad_error()
 
 void do_low_sync()
 {
+	dump_exception_registers();
 	panic(__func__);
 }
 

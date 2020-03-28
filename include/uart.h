@@ -19,5 +19,6 @@
 } while (0);
 
 void uart_puts(uint64_t uart, const char *str);
+void uart_hexval(uint64_t uart, uint64_t val);
 
 #endif

@@ -50,8 +50,6 @@ extern uint64_t pgtable_lv2[];
 		    (VTCR_TG0_VALUE << VTCR_TG0_SHIFT) | \
 		    (VTCR_PS_VALUE << VTCR_PS_SHIFT))
 
-#define VTTBR_VALUE (((uint64_t) pgtable_lv2) & 0x00007fffffffffffUL)
-
 void setup_pgtables();
 
 #endif
