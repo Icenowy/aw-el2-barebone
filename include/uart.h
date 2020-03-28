@@ -21,4 +21,12 @@
 void uart_puts(uint64_t uart, const char *str);
 void uart_hexval(uint64_t uart, uint64_t val);
 
+#ifdef NDEBUG
+#define uart_puts_debug(a, b)
+#define uart_hexval_debug(a, b)
+#else
+#define uart_puts_debug(a, b) uart_puts(a, b)
+#define uart_hexval_debug(a, b) uart_hexval(a, b)
+#endif
+
 #endif

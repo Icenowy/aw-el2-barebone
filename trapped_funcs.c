@@ -9,17 +9,17 @@ extern void _secondary_start();
 bool wrap_psci(struct pt_regs *pt_regs)
 {
 	if (pt_regs->regs[0] == 0xc4000003) {
-		uart_puts(SOC_UART0, "PSCI CPU_ON caught.\n");
+		uart_puts_debug(SOC_UART0, "PSCI CPU_ON caught.\n");
 
 		/* Check target MPIDR */
 		if (pt_regs->regs[1] > 4)
 			panic("Unknown target CPU MPIDR when CPU_ON\n");
 
-		uart_puts(SOC_UART0, "CPU ");
-		uart_hexval(SOC_UART0, pt_regs->regs[1]);
-		uart_puts(SOC_UART0, " EL1 entrypoint is ");
-		uart_hexval(SOC_UART0, pt_regs->regs[2]);
-		uart_puts(SOC_UART0, "\n");
+		uart_puts_debug(SOC_UART0, "CPU ");
+		uart_hexval_debug(SOC_UART0, pt_regs->regs[1]);
+		uart_puts_debug(SOC_UART0, " EL1 entrypoint is ");
+		uart_hexval_debug(SOC_UART0, pt_regs->regs[2]);
+		uart_puts_debug(SOC_UART0, "\n");
 
 		secondary_el1_ep[pt_regs->regs[1]] = (void *) pt_regs->regs[2];
 		pt_regs->regs[2] = (uint64_t) _secondary_start;
