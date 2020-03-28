@@ -51,6 +51,7 @@ extern uint64_t pgtable_lv2[];
 		    (VTCR_TG0_VALUE << VTCR_TG0_SHIFT) | \
 		    (VTCR_PS_VALUE << VTCR_PS_SHIFT))
 
-void setup_pgtables();
+void init_pgtables();
+void install_pgtables();
 
 #endif

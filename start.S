@@ -15,8 +15,12 @@ _start:
 
 	bl init
 
-	ldr x4, =SOC_NEXT_STAGE
-	cbnz x0, fail
+	ldr x1, =SOC_NEXT_STAGE
+	cbz x0, jump_to_el1
+	/* When main() returns non-zero, just go */
+fail:	br x1
+
+jump_to_el1:
 	/* Initialize Generic Timers */
 	mrs	x6, cnthctl_el2
 	/* Enable EL1 access to timers */
@@ -68,8 +72,41 @@ _start:
 			SPSR_EL_IRQ_MASK | SPSR_EL_FIQ_MASK |\
 			SPSR_EL_M_AARCH64 | SPSR_EL_M_EL1H)
 	msr	spsr_el2, x6
-	msr     elr_el2, x4
+	msr     elr_el2, x1
 	eret
 
-	/* When main() returns non-zero, just go */
-fail:	br x4
+.global _secondary_start
+_secondary_start:
+	mov x1, #1
+	msr spsel, x1
+
+	mrs x1, mpidr_el1
+	and x1, x1, #0x00ffffff
+	cmp x1, #0
+	beq 1f
+	cmp x1, #1
+	beq 2f
+	cmp x1, #2
+	beq 3f
+	cmp x1, #3
+	beq 4f
+spin:	b spin
+1:	ldr x1, =stack_generic
+	b 6f
+2:	ldr x1, =stack_generic_core1
+	b 6f
+3:	ldr x1, =stack_generic_core2
+	b 6f
+4:	ldr x1, =stack_generic_core3
+	b 6f
+6:	mov sp, x1
+
+	ldr x1, =vectors
+	msr vbar_el2, x1
+
+	stp x0, x2, [sp, #-16]!
+	bl secondary_init
+	cbz x0, spin
+	mov x1, x0
+	ldp x0, x2, [sp], #16
+	b jump_to_el1

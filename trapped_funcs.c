@@ -1,12 +1,28 @@
 #include SOC_HEADER
 #include "trapped_funcs.h"
 #include "uart.h"
+#include "panic.h"
+#include "init.h"
+
+extern void _secondary_start();
 
 bool wrap_psci(struct pt_regs *pt_regs)
 {
 	if (pt_regs->regs[0] == 0xc4000003) {
 		uart_puts(SOC_UART0, "PSCI CPU_ON caught.\n");
 
+		/* Check target MPIDR */
+		if (pt_regs->regs[1] > 4)
+			panic("Unknown target CPU MPIDR when CPU_ON\n");
+
+		uart_puts(SOC_UART0, "CPU ");
+		uart_hexval(SOC_UART0, pt_regs->regs[1]);
+		uart_puts(SOC_UART0, " EL1 entrypoint is ");
+		uart_hexval(SOC_UART0, pt_regs->regs[2]);
+		uart_puts(SOC_UART0, "\n");
+
+		secondary_el1_ep[pt_regs->regs[1]] = (void *) pt_regs->regs[2];
+		pt_regs->regs[2] = (uint64_t) _secondary_start;
 	}
 
 	asm volatile ("mov x0, %0\n"

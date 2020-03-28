@@ -6,7 +6,7 @@ uint64_t pgtable_lv2[8] __attribute__((aligned(64)));
 uint64_t pgtable_lv3_blk0[8192] __attribute__((aligned(65536)));
 uint64_t pgtable_lv3_blk2[8192] __attribute__((aligned(65536)));
 
-void setup_pgtables()
+void init_pgtables()
 {
 	/* TODO: Set up pgtable_lv3_blk0 */
 	for (uint64_t i = 0; i < 2; i++) {
@@ -36,7 +36,10 @@ void setup_pgtables()
 	}
 
 	pgtable_lv2[2] = (uint64_t) pgtable_lv3_blk2 | PTE_VALID | PTE_TABLE;
+}
 
+void install_pgtables()
+{
 	asm volatile("msr vtcr_el2, %0" : : "r" (VTCR_VALUE) : "cc");	
 	asm volatile("msr vttbr_el2, %0" : : "r" (pgtable_lv2) : "cc");
 	asm volatile("isb");
