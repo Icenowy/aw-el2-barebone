@@ -96,8 +96,8 @@ void do_bad_error()
 
 void do_low_sync(struct pt_regs *pt_regs, unsigned int esr)
 {
-	dump_registers(pt_regs, esr);
 	if (!process_low_sync(pt_regs, esr)) {
+		dump_registers(pt_regs, esr);
 		panic(__func__);
 	}
 }
