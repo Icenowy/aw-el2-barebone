@@ -61,20 +61,13 @@ static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t far)
 	/* TODO: locking */
 
 	uint32_t page = (uint32_t) (far >> 16);
-	uint32_t local_addr = (uint32_t) (far & 0xffff);
+	uint64_t local_addr = far & 0xffff;
+	uint64_t real_addr = HOLE_REAL_ADDR | local_addr;
 
 	if (!(esr & ESR_DATA_ABORT_ISV))
 		return false;
 
-	if (current_hole_page != page) {
-		uart_puts_debug(SOC_UART0, "Cutting page to ");
-		uart_hexval_debug(SOC_UART0, page);
-		uart_puts_debug(SOC_UART0, "\n");
-		writel(page, HOLE_PAGE_REG);
-		current_hole_page = page;
-	}
-
-	uint64_t real_addr = HOLE_REAL_ADDR | local_addr;
+	writel(page, HOLE_PAGE_REG);
 
 	uint8_t *pb = (uint8_t *) real_addr;
 	uint16_t *phw = (uint16_t *) real_addr;
