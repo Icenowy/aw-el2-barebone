@@ -7,7 +7,7 @@ AS = $(CROSS_COMPILE)as
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
-INCLUDES = -I $(PWD)/include -I $(PWD)/uboot-headers -ffreestanding
+INCLUDES = -I ./include -I ./uboot-headers -ffreestanding
 
 DEFINES = -DSOC_HEADER="\"h6.h\""
 
