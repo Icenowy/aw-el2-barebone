@@ -1,5 +1,7 @@
 CROSS_COMPILE ?= /opt/abcross/arm64/bin/aarch64-aosc-linux-gnu-
 
+DEBUG ?= 0
+
 CC = $(CROSS_COMPILE)gcc
 AS = $(CROSS_COMPILE)as
 LD = $(CROSS_COMPILE)ld
@@ -8,6 +10,10 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 INCLUDES = -I $(PWD)/include -I $(PWD)/uboot-headers -ffreestanding
 
 DEFINES = -DSOC_HEADER="\"h6.h\""
+
+ifneq ($(DEBUG),1)
+DEFINES += -DNDEBUG
+endif
 
 ASFLAGS = $(INCLUDES) $(DEFINES) -D__ASSEMBLY__
 CFLAGS = $(INCLUDES) $(DEFINES) -O2
