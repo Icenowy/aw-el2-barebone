@@ -133,6 +133,9 @@ static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t ipa)
 			uint64_t data = *pdw;
 			*reg = data;
 		}
+
+		if (!(esr & ESR_DATA_ABORT_SF))
+			*(((uint32_t *) reg) + 1) = 0;
 	}
 	spinlock_unlock(&cutpage_lock);
 
