@@ -1,5 +1,5 @@
-#ifndef _A64_H_
-#define _A64_H_
+#ifndef _H6_H_
+#define _H6_H_
 
 #define SOC_UART0		0x05000000
 
