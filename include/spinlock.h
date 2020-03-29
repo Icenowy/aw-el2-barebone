@@ -4,18 +4,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef bool spinlock;
+typedef int spinlock;
 
 static inline void spinlock_init(spinlock *l) {
-	__atomic_clear(l, __ATOMIC_RELAXED);
+	*l = 0;
 }
 
 static inline void spinlock_lock(spinlock *l) {
-	while (__atomic_test_and_set(l, __ATOMIC_ACQUIRE)) ;
+	while(!__sync_bool_compare_and_swap(l, 0, 1)) asm volatile ("wfe");
 }
 
 static inline void spinlock_unlock(spinlock *l) {
-	__atomic_clear(l, __ATOMIC_RELEASE);
+	*l = 0;
 }
 
 #endif
