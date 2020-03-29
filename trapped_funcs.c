@@ -3,10 +3,14 @@
 #include "uart.h"
 #include "panic.h"
 #include "init.h"
+#include "pgtables.h"
+#include "hole.h"
 
 extern void _secondary_start();
 
-bool wrap_psci(struct pt_regs *pt_regs)
+uint32_t current_hole_page = 0;
+
+static bool wrap_psci(struct pt_regs *pt_regs)
 {
 	if (pt_regs->regs[0] == 0xc4000003) {
 		uart_puts_debug(SOC_UART0, "PSCI CPU_ON caught.\n");
@@ -52,11 +56,119 @@ bool wrap_psci(struct pt_regs *pt_regs)
 	return true;
 }
 
+static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t far)
+{
+	/* TODO: locking */
+
+	uint32_t page = (uint32_t) (far >> 16);
+	uint32_t local_addr = (uint32_t) (far & 0xffff);
+
+	if (!(esr & ESR_DATA_ABORT_ISV))
+		return false;
+
+	if (current_hole_page != page) {
+		uart_puts_debug(SOC_UART0, "Cutting page to ");
+		uart_hexval_debug(SOC_UART0, page);
+		uart_puts_debug(SOC_UART0, "\n");
+		writel(page, HOLE_PAGE_REG);
+		current_hole_page = page;
+	}
+
+	uint64_t real_addr = HOLE_REAL_ADDR | local_addr;
+
+	uint8_t *pb = (uint8_t *) real_addr;
+	uint16_t *phw = (uint16_t *) real_addr;
+	uint32_t *pw = (uint32_t *) real_addr;
+	uint64_t *pdw = (uint64_t *) real_addr;
+
+	uint64_t *reg = &pt_regs->regs[(esr & ESR_DATA_ABORT_SRT_MASK) >> ESR_DATA_ABORT_SRT_SHIFT];
+	if (esr & ESR_DATA_ABORT_WnR) {
+		/* Write to memory */
+		uint64_t data = *reg;
+		if ((esr & ESR_DATA_ABORT_SAS_MASK) == ESR_DATA_ABORT_SAS_B)
+			*pb = (uint8_t) data;
+		else if ((esr & ESR_DATA_ABORT_SAS_MASK) == ESR_DATA_ABORT_SAS_HW)
+			*phw = (uint16_t) data;
+		else if ((esr & ESR_DATA_ABORT_SAS_MASK) == ESR_DATA_ABORT_SAS_W)
+			*pw = (uint32_t) data;
+		else
+			*pdw = (uint64_t) data;
+	} else {
+		/* Read from memory */
+		if ((esr & ESR_DATA_ABORT_SAS_MASK) == ESR_DATA_ABORT_SAS_B) {
+			uint8_t data = *pb;
+			if (esr & ESR_DATA_ABORT_SSE) {
+				if (esr & ESR_DATA_ABORT_SF)
+					*((int64_t *) reg) = (int8_t) data;
+				else
+					*((int32_t *) reg) = (int8_t) data;
+			} else {
+				if (esr & ESR_DATA_ABORT_SF)
+					*((uint64_t *) reg) = (uint8_t) data;
+				else
+					*((uint32_t *) reg) = (uint8_t) data;
+			}
+		} else if ((esr & ESR_DATA_ABORT_SAS_MASK) == ESR_DATA_ABORT_SAS_HW) {
+			uint16_t data = *phw;
+			if (esr & ESR_DATA_ABORT_SSE) {
+				if (esr & ESR_DATA_ABORT_SF)
+					*((int64_t *) reg) = (int16_t) data;
+				else
+					*((int32_t *) reg) = (int16_t) data;
+			} else {
+				if (esr & ESR_DATA_ABORT_SF)
+					*((uint64_t *) reg) = (uint16_t) data;
+				else
+					*((uint32_t *) reg) = (uint16_t) data;
+			}
+		} else if ((esr & ESR_DATA_ABORT_SAS_MASK) == ESR_DATA_ABORT_SAS_W) {
+			uint32_t data = *pw;
+			if (esr & ESR_DATA_ABORT_SSE) {
+				if (esr & ESR_DATA_ABORT_SF)
+					*((int64_t *) reg) = (int32_t) data;
+				else
+					*((int32_t *) reg) = (int32_t) data;
+			} else {
+				if (esr & ESR_DATA_ABORT_SF)
+					*((uint64_t *) reg) = (uint32_t) data;
+				else
+					*((uint32_t *) reg) = (uint32_t) data;
+			}
+		} else {
+			uint64_t data = *pdw;
+			*reg = data;
+		}
+	}
+
+	pt_regs->elr += 4;
+	return true;
+}
+
+static bool wrap_hole_io(struct pt_regs *pt_regs, unsigned int esr)
+{
+	uint64_t far;
+	asm volatile("mrs %0, far_el2" : "=r" (far) : : "cc");
+
+	if (far < HOLE_START || far >= HOLE_END)
+		return false;
+
+	uart_puts_debug(SOC_UART0, "Wrapping IO to ");
+	uart_hexval_debug(SOC_UART0, far);
+	uart_puts_debug(SOC_UART0, "\n");
+
+	return cutpage_io(pt_regs, esr, far);
+}
+
 bool process_low_sync(struct pt_regs *pt_regs, unsigned int esr)
 {
 	if ((esr & ESR_EC_MASK) == ESR_EC_SMC_64 && (esr & ESR_SMC_64_IMM_MASK) == 0) {
 		/* wrapping PSCI */
 		return wrap_psci(pt_regs);
+	}
+	if ((esr & ESR_EC_MASK) == ESR_EC_DATA_ABORT &&
+	    (esr & ESR_DATA_ABORT_TYPE_MASK) == ESR_DATA_ABORT_TRANSLATION_LEVEL_3) {
+		/* Trying to wrap hole IO */
+		return wrap_hole_io(pt_regs, esr);
 	}
 	return false;
 }

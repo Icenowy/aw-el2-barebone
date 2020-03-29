@@ -2,6 +2,7 @@
 #include "uart.h"
 #include "mmio.h"
 #include "pgtables.h"
+#include "trapped_funcs.h"
 
 #include <stddef.h>
 
@@ -21,6 +22,8 @@ int init()
 		uart_puts(SOC_UART0, "Error: current EL is not EL2\n");
 		return 1;
 	}
+
+	current_hole_page = 0;
 
 	init_pgtables();
 	install_pgtables();
