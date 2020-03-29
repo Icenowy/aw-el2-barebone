@@ -8,7 +8,7 @@
 
 extern void _secondary_start();
 
-uint32_t current_hole_page = 0;
+spinlock cutpage_lock;
 
 static bool wrap_psci(struct pt_regs *pt_regs)
 {
@@ -56,12 +56,12 @@ static bool wrap_psci(struct pt_regs *pt_regs)
 	return true;
 }
 
-static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t far)
+static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t ipa)
 {
-	/* TODO: locking */
+	spinlock_lock(&cutpage_lock);
 
-	uint32_t page = (uint32_t) (far >> 16);
-	uint64_t local_addr = far & 0xffff;
+	uint32_t page = (uint32_t) (ipa >> 16);
+	uint64_t local_addr = ipa & 0xffff;
 	uint64_t real_addr = HOLE_REAL_ADDR | local_addr;
 
 	if (!(esr & ESR_DATA_ABORT_ISV))
@@ -132,6 +132,7 @@ static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t far)
 			*reg = data;
 		}
 	}
+	spinlock_unlock(&cutpage_lock);
 
 	pt_regs->elr += 4;
 	return true;
@@ -141,15 +142,19 @@ static bool wrap_hole_io(struct pt_regs *pt_regs, unsigned int esr)
 {
 	uint64_t far;
 	asm volatile("mrs %0, far_el2" : "=r" (far) : : "cc");
+	uint64_t hpfar;
+	asm volatile("mrs %0, hpfar_el2" : "=r" (hpfar) : : "cc");
 
-	if (far < HOLE_START || far >= HOLE_END)
+	uint64_t ipa = ((hpfar & 0xfffff0) << 8) | (far & 0xfff);
+
+	if (ipa < HOLE_START || ipa >= HOLE_END)
 		return false;
 
 	uart_puts_debug(SOC_UART0, "Wrapping IO to ");
-	uart_hexval_debug(SOC_UART0, far);
+	uart_hexval_debug(SOC_UART0, ipa);
 	uart_puts_debug(SOC_UART0, "\n");
 
-	return cutpage_io(pt_regs, esr, far);
+	return cutpage_io(pt_regs, esr, ipa);
 }
 
 bool process_low_sync(struct pt_regs *pt_regs, unsigned int esr)

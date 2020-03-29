@@ -1,6 +1,8 @@
 #ifndef _TRAPPED_FUNCS_H_
 #define _TRAPPED_FUNCS_H_
 
+#include "spinlock.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -27,6 +29,6 @@
 
 bool process_low_sync(struct pt_regs *pt_regs, unsigned int esr);
 
-extern uint32_t current_hole_page;
+extern spinlock cutpage_lock;
 
 #endif

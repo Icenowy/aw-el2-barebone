@@ -19,6 +19,9 @@ static void dump_registers(struct pt_regs *pt_regs, unsigned int esr)
 	uart_puts(SOC_UART0, "\nfar: ");
 	asm volatile("mrs %0, far_el2" : "=r" (reg) : : "cc");
 	uart_hexval(SOC_UART0, reg);
+	uart_puts(SOC_UART0, "\nhpfar: ");
+	asm volatile("mrs %0, hpfar_el2" : "=r" (reg) : : "cc");
+	uart_hexval(SOC_UART0, reg);
 	PUT_PT_REG(0);
 	PUT_PT_REG(1);
 	PUT_PT_REG(2);

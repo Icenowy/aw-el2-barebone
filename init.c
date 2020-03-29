@@ -23,7 +23,7 @@ int init()
 		return 1;
 	}
 
-	current_hole_page = 0;
+	spinlock_init(&cutpage_lock);
 
 	init_pgtables();
 	install_pgtables();
