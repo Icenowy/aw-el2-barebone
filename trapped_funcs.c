@@ -64,8 +64,10 @@ static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t ipa)
 	uint64_t local_addr = ipa & 0xffff;
 	uint64_t real_addr = HOLE_REAL_ADDR | local_addr;
 
-	if (!(esr & ESR_DATA_ABORT_ISV))
+	if (!(esr & ESR_DATA_ABORT_ISV)) {
+		spinlock_unlock(&cutpage_lock);
 		return false;
+	}
 
 	writel(page, HOLE_PAGE_REG);
 
