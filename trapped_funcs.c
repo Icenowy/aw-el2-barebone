@@ -58,16 +58,15 @@ static bool wrap_psci(struct pt_regs *pt_regs)
 
 static bool cutpage_io(struct pt_regs *pt_regs, unsigned int esr, uint64_t ipa)
 {
+	if (!(esr & ESR_DATA_ABORT_ISV)) {
+		return false;
+	}
+
 	spinlock_lock(&cutpage_lock);
 
 	uint32_t page = (uint32_t) (ipa >> 16);
 	uint64_t local_addr = ipa & 0xffff;
 	uint64_t real_addr = HOLE_REAL_ADDR | local_addr;
-
-	if (!(esr & ESR_DATA_ABORT_ISV)) {
-		spinlock_unlock(&cutpage_lock);
-		return false;
-	}
 
 	writel(page, HOLE_PAGE_REG);
 
