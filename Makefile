@@ -16,7 +16,7 @@ DEFINES += -DNDEBUG
 endif
 
 ASFLAGS = $(INCLUDES) $(DEFINES) -D__ASSEMBLY__
-CFLAGS = $(INCLUDES) $(DEFINES) -O2
+CFLAGS = $(INCLUDES) $(DEFINES) -O2 -mno-outline-atomics -fno-stack-protector
 
 LDSCRIPT = ldscripts/a64.ld
 LDSCRIPTS = ldscripts/a64.ld ldscripts/common.ld
