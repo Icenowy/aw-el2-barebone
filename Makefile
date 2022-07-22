@@ -21,7 +21,7 @@ CFLAGS = $(INCLUDES) $(DEFINES) -O2
 LDSCRIPT = ldscripts/a64.ld
 LDSCRIPTS = ldscripts/a64.ld ldscripts/common.ld
 
-LDFLAGS = -nostdlib -nostartfiles -static -T $(LDSCRIPT)
+LDFLAGS = -nostdlib -static -T $(LDSCRIPT)
 
 OBJS = start.o init.o uart.o stack.o exceptions.o exception_funcs.o panic.o pgtables.o trapped_funcs.o
 
